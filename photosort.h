@@ -9,7 +9,7 @@ using namespace cv;
 
 namespace Photosort
 {
-    int run(std::string folder);
+    int run(std::string path);
     std::vector<cv::Mat> applyHistogram(const cv::Mat& img);
 }
 

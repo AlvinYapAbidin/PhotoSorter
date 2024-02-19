@@ -45,7 +45,7 @@ namespace Photosort
                 std::string imagePath = entry.path().string();
                 cv::Mat img = cv::imread(imagePath, cv::IMREAD_COLOR);
                 if (img.empty()) {
-                    std::cerr << "Failed to load image at " << imagePath << std::endl;
+                    std::cerr << "Failed to load image at " << imagePath << std::endl; // Check empty imgs
                     continue; // Skip this image
                 }
 
