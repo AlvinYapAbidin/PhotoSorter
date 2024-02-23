@@ -72,10 +72,10 @@ namespace Photosort
         cv::resize(image, image, cv::Size(), 0.5, 0.5);
 
         cv::Mat imgBlurred;
-        medianBlur(image, imgBlurred, 3);
+        cv::GaussianBlur(image, imgBlurred, cv::Size(3,3), 0);
 
-        cv::Mat imgSharpened;
-        Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0); 
+        // cv::Mat imgSharpened;
+        // Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0); 
         
         //cv::Mat imgDenoised;
         //cv::fastNlMeansDenoisingColored(image, imgDenoised, 10, 10, 7, 21);
@@ -168,7 +168,7 @@ namespace Photosort
 
         std::map<int, std::vector<int>> clusters; // ClusterID to list of image indices        
         int clusterId = 0;
-        const int MATCH_THRESHOLD = 100; // Minimum number of matches required
+        const int MATCH_THRESHOLD = 80; // Minimum number of matches required
         const float ratio_thresh = 0.6f; // Lowe's ratio threshold for filtering matches
 
         cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
