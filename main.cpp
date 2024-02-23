@@ -1,6 +1,10 @@
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
+#include <filesystem>
+#include <vector>
+#include <string>
 #include <iostream>
 #include "photosort.h"
 
@@ -22,6 +26,8 @@ int main(int argc, char** argv)
     // Gui to help choose pictures within clusters
 
 
+
+    //Photosort::run("/home/alvin/Documents/Projects/Computer_Vision_Projects/PhotoSorter/test");
 
     Photosort::run("test");
 }
