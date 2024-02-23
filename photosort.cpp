@@ -11,10 +11,9 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include "clustering.h"
 
 // Didn't use namespace cv and std for learning purposes
-using namespace cv;
-using namespace cv::xfeatures2d;
 
 
 namespace Photosort
@@ -32,8 +31,8 @@ namespace Photosort
 
         // Determine grid size
         size_t numRows = (imagePaths.size() + imagesPerRow - 1) / imagesPerRow;
-        int thumbWidth = 300; // Width of each thumbnail
-        int thumbHeight = 300; // Height of each thumbnail
+        int thumbWidth = 500; // Width of each thumbnail
+        int thumbHeight = 500; // Height of each thumbnail
 
         // Create a large image to hold the grid
         cv::Mat gridImage(thumbHeight * numRows, thumbWidth * imagesPerRow, CV_8UC3, cv::Scalar(0, 0, 0));
@@ -66,23 +65,27 @@ namespace Photosort
         cv::destroyWindow(windowName);
     }
 
-
     cv::Mat preprocess(cv::Mat image)
     {
         cv::resize(image, image, cv::Size(), 0.5, 0.5);
 
-        cv::Mat imgBlurred;
-        cv::GaussianBlur(image, imgBlurred, cv::Size(3,3), 0);
+        cv::Mat imgGray;
+        cv::cvtColor(image, imgGray, cv::COLOR_BGR2GRAY);
 
-        // cv::Mat imgSharpened;
-        // Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0); 
+        cv::Mat imgBlurred;
+        cv::GaussianBlur(imgGray, imgBlurred, cv::Size(3,3), 0);
+        
+        cv::Mat imgSharpened;
+        Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0); 
+
+        cv::Mat imgContrast;
+        cv::createCLAHE()->apply(imgBlurred, imgContrast);
         
         //cv::Mat imgDenoised;
         //cv::fastNlMeansDenoisingColored(image, imgDenoised, 10, 10, 7, 21);
 
-        return imgBlurred;
+        return imgContrast;
     }
-
 
     void updateProgressBar(int current, int total)
     {
@@ -130,26 +133,21 @@ namespace Photosort
                     continue;
                 }
 
-                // // Preprocessing
-                // cv::Mat resizedImg;
-                // cv::resize(img, resizedImg, cv::Size(), 0.1, 0.1); // Resized to make program run faster
-
                 // Preprocess
                 cv::Mat preprocessedImg = preprocess(img);
 
-                // Detect all of the keypoints
-                int minHessian = 400;
-                cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
+                // cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
+                cv::Ptr<cv::ORB> detector = cv::ORB::create();
                 std::vector<cv::KeyPoint> keyPoints;
                 cv::Mat descriptors;
 
                 detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
 
-                // FLANN matcher requires descriptors to be type 'CV_32F'
-                if (descriptors.type() != CV_32F) 
-                {
-                    descriptors.convertTo(descriptors, CV_32F);
-                }
+                // // FLANN matcher requires descriptors to be type 'CV_32F'
+                // if (descriptors.type() != CV_32F) 
+                // {
+                //     descriptors.convertTo(descriptors, CV_32F);
+                // }
 
                 allKeypoints.push_back(keyPoints);
                 allDescriptors.push_back(descriptors);
@@ -161,55 +159,17 @@ namespace Photosort
         std::cout << std::endl;
 
 
-
-        // Cluster based on similarity score
+        // Cluster based on similarity score with FLANN
         std::cout << "Clustering based on similarity" << std::endl;
-        processFiles = 0;
 
-        std::map<int, std::vector<int>> clusters; // ClusterID to list of image indices        
-        int clusterId = 0;
-        const int MATCH_THRESHOLD = 80; // Minimum number of matches required
-        const float ratio_thresh = 0.6f; // Lowe's ratio threshold for filtering matches
+        const int MATCH_THRESHOLD = 20; // Minimum number of matches required
+        const float ratio_thresh = 0.75f; // Lowe's ratio threshold for filtering matches
 
-        cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
-
-        for (int i = 0; i < allDescriptors.size(); i++)
-        {
-            bool foundCluster = false;
-            for (std::pair<const int, std::vector<int>>& cluster : clusters)
-            {
-                // Here we match the current image descriptors with the first image of each cluster
-                std::vector<std::vector<cv::DMatch>> knn_matches;
-                matcher->cv::DescriptorMatcher::knnMatch(allDescriptors[i], allDescriptors[cluster.second[0]], knn_matches, 2);
-                
-                // Filter matches using the Lowe's ratio test
-                std::vector<DMatch> good_matches;
-                for (size_t j = 0; j < knn_matches.size(); j++)
-                {
-                    if (knn_matches[j].size() == 2 && knn_matches[j][0].distance < ratio_thresh * knn_matches[j][1].distance)
-                    {
-                        good_matches.push_back(knn_matches[j][0]);
-                    }
-                }
-
-                if (good_matches.size() > MATCH_THRESHOLD)
-                {
-                    // Add to cluster if current image is similar
-                    cluster.second.push_back(i);
-                    foundCluster = true;
-                    break;
-                }
-                
-            }
-            if (!foundCluster) 
-            {
-                clusters[clusterId++] = std::vector<int>{i}; // A new cluster is created for the image if no similar is found
-            }
-            updateProgressBar(++processFiles, totalFiles);
-        }
+        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh);
 
         std::cout << std::endl;
     
+
         // Use the indices to refer back to the image paths
         for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
         {
@@ -219,40 +179,6 @@ namespace Photosort
                 std::cout << " - " << image_paths[index] << std::endl; // Access path using index
             }
         }
-
-
-        // // Displaying the images
-        // int windowWidth = 800;
-        // int windowHeight = 600; 
-        
-        // for (const std::pair<const int, std::vector<int>>& cluster : clusters) {
-        //     std::string windowName = "Cluster " + std::to_string(cluster.first);
-        //     // cv::namedWindow(windowName, cv::WINDOW_NORMAL);
-        //     // cv::resizeWindow(windowName, windowWidth, windowHeight);
-
-        //     for (const int& index : cluster.second) {
-        //         cv::Mat img = cv::imread(image_paths[index]); 
-        //         if (!img.empty()) {
-        //             cv::Mat resizedImg;
-        //             float aspectRatio = (float)img.cols / (float)img.rows;
-        //             int resizedWidth, resizedHeight;
-        //             if (aspectRatio > 1) { // Image is wider than it is tall
-        //                 resizedWidth = windowWidth;
-        //                 resizedHeight = static_cast<int>(windowWidth / aspectRatio);
-        //             } else { // Image is taller than it is wide or square
-        //                 resizedHeight = windowHeight;
-        //                 resizedWidth = static_cast<int>(windowHeight * aspectRatio);
-        //             }
-        //             cv::resize(img, resizedImg, cv::Size(resizedWidth, resizedHeight));
-
-        //             // Display image
-        //             cv::imshow(windowName, resizedImg); // Display the resized image
-        //             int key = cv::waitKey(0); // Wait for a key press to move to the next image
-        //             if (key == 27) break; // Optional: break on ESC key to move to the next cluster
-        //         }
-        //     }
-        //     cv::destroyWindow(windowName);
-        // }
 
         // Loop through each cluster and display its images in a grid
         for (const auto& cluster : clusters) {

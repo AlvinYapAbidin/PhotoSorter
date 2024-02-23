@@ -20,12 +20,12 @@ int main(int argc, char** argv)
     // Apply histogram to each picture, possibly add  feature detection for better accuracy
 
     // Use cluster algorithm to group similar 
-    
+
     // Gui to help choose pictures within clusters
 
 
 
-    //Photosort::run("/home/alvin/Documents/Projects/Computer_Vision_Projects/PhotoSorter/test");
+    // Photosort::run("test");
 
     Photosort::run("photos");
 }
