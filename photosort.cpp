@@ -159,18 +159,20 @@ namespace Photosort
         std::cout << std::endl;
 
 
-        // Cluster based on similarity score with FLANN
+        // Cluster based on similarity score
         std::cout << "Clustering based on similarity" << std::endl;
 
         const int MATCH_THRESHOLD = 20; // Minimum number of matches required
         const float ratio_thresh = 0.75f; // Lowe's ratio threshold for filtering matches
 
-        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh);
+        //std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT dectector
+
+        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use BFMatcher with ORB detector
 
         std::cout << std::endl;
     
 
-        // Use the indices to refer back to the image paths
+        // Printing each of the clusters
         for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
         {
             std::cout << "Cluster " << cluster.first << " has " << cluster.second.size() << " photos:\n";
