@@ -15,7 +15,6 @@
 
 // Didn't use namespace cv and std for learning purposes
 
-
 namespace Photosort
 {
     int countFilesInDirectory(const std::filesystem::path& path) {
@@ -31,8 +30,8 @@ namespace Photosort
 
         // Determine grid size
         size_t numRows = (imagePaths.size() + imagesPerRow - 1) / imagesPerRow;
-        int thumbWidth = 500; // Width of each thumbnail
-        int thumbHeight = 500; // Height of each thumbnail
+        int thumbWidth = 500; 
+        int thumbHeight = 500; 
 
         // Create a large image to hold the grid
         cv::Mat gridImage(thumbHeight * numRows, thumbWidth * imagesPerRow, CV_8UC3, cv::Scalar(0, 0, 0));
@@ -61,7 +60,7 @@ namespace Photosort
         // Display the grid
         cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
         cv::imshow(windowName, gridImage);
-        cv::waitKey(0); // Wait for any key press to close
+        cv::waitKey(0);
         cv::destroyWindow(windowName);
     }
 
@@ -82,7 +81,7 @@ namespace Photosort
         cv::createCLAHE()->apply(imgBlurred, imgContrast);
         
         //cv::Mat imgDenoised;
-        //cv::fastNlMeansDenoisingColored(image, imgDenoised, 10, 10, 7, 21);
+        //cv::fastNlMeansDenoisingColored(image, imgDenoised, 10, 10, 7, 21); // Another option for preprocessing
 
         return imgContrast;
     }
@@ -117,7 +116,7 @@ namespace Photosort
             return -1;
         }
         
-        std::cout << "Preprocessing and detecting keypoints using SIFT detector" << std::endl;
+        std::cout << "Preprocessing and detecting keypoints using ORB detector" << std::endl; // Update text to display appropriate detector.
         int totalFiles = countFilesInDirectory(folder_path);
         int processFiles{};
 
@@ -144,7 +143,7 @@ namespace Photosort
                 detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
 
                 // // FLANN matcher requires descriptors to be type 'CV_32F'
-                // if (descriptors.type() != CV_32F) 
+                // if (descriptors.type() != CV_32F)  
                 // {
                 //     descriptors.convertTo(descriptors, CV_32F);
                 // }
@@ -175,12 +174,14 @@ namespace Photosort
         // Printing each of the clusters
         for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
         {
-            std::cout << "Cluster " << cluster.first << " has " << cluster.second.size() << " photos:\n";
+            std::cout << "Cluster " << cluster.first + 1 << " has " << cluster.second.size() << " photos:\n";
             for (const int& index : cluster.second) 
             {
-                std::cout << " - " << image_paths[index] << std::endl; // Access path using index
+                std::cout << " - " << image_paths[index] << std::endl; // Access path using index 
             }
         }
+
+        std::cout << "Press any key to go to the next cluster." << std::endl;
 
         // Loop through each cluster and display its images in a grid
         for (const auto& cluster : clusters) {
@@ -189,8 +190,8 @@ namespace Photosort
                 clusterImagePaths.push_back(image_paths[index]); // Collect image paths for the current cluster
             }
 
-            // Display images in a grid
-            displayImagesGrid(clusterImagePaths, "Cluster " + std::to_string(cluster.first));
+            // Display images
+            displayImagesGrid(clusterImagePaths, "Cluster " + std::to_string(cluster.first + 1));
         }
 
 
