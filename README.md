@@ -47,7 +47,8 @@ To run the application, you need to provide the path to the directory containing
 The application will process the images, detecting keypoints and descriptors, and then cluster the images based on similarity. Each cluster's images will be displayed in a window.
 
 The provided code comprises two parts, photosort.cpp and clustering.cpp, which are designed to sort and cluster images based on their visual similarity. Here's a breakdown of what each part does and some suggestions for improvement or considerations in case you encounter any issues.
-photosort.cpp Overview
+
+### photosort.cpp Overview
 
 - Functionality: This part of the code handles reading images from a directory, preprocessing them, detecting keypoints using the ORB detector (originally designed for SIFT but changed to ORB), and then clustering the images based on the similarity of their features. It also includes functions for displaying images in a grid format, which is useful for visualizing clusters.
 
@@ -59,7 +60,7 @@ photosort.cpp Overview
 
 - Progress Bar: A simple progress bar is implemented to give feedback during the processing of images.
 
-clustering.cpp Overview
+### clustering.cpp Overview
 
 - Clustering Functionality: Contains two functions for clustering images based on the similarity of their features. One uses FLANN for approximate nearest neighbors search, suitable for SIFT descriptors, and the other uses BFMatcher, which is used with the ORB descriptors.
 
