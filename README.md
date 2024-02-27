@@ -66,7 +66,7 @@ The provided code comprises two parts, photosort.cpp and clustering.cpp, which a
 
 - FLANN vs. BFMatcher: The choice between FLANN and BFMatcher depends on the type of descriptors being used and the specific requirements of the application. FLANN is generally faster for large datasets but may be less accurate than BFMatcher.
 
-Suggestions and Considerations
+### Suggestions and Considerations
 
 - ORB vs. SIFT: The change from SIFT to ORB might significantly affect the quality and performance of the feature matching process. ORB is faster and less memory-intensive than SIFT but might be less accurate in some cases. It is essential to consider the trade-offs based on your application's needs.
 
