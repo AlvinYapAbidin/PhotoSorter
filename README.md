@@ -8,7 +8,7 @@ PhotoSort is an application designed to help users automatically organize their 
 
 ### Prerequisites
 
-Before installing the Vision Library, ensure that OpenCV is installed on your system. This library has been tested with OpenCV version 3.5 & later. For detailed installation instructions of OpenCV (version 4.x), please refer to the [official OpenCV documentation](https://docs.opencv.org/master/). A basic understanding of terminal or command prompt usage is required.
+Before installing PhotoSorter, ensure that OpenCV is installed on your system. This library has been tested with OpenCV version 3.5 & later. For detailed installation instructions of OpenCV (version 4.x), please refer to the [official OpenCV documentation](https://docs.opencv.org/master/). A basic understanding of terminal or command prompt usage is required.
 
 ### Building the Library
 
