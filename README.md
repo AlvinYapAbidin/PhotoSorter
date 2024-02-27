@@ -37,6 +37,8 @@ Step 2: Compile the Application
 
         make
 
+## Demonstration
+![Project Demo] (https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/demo.gif)
 
 ## Usage
 
