@@ -32,7 +32,7 @@ To specify the folder of pictures, you must enter the folder name within the mai
 
     Photosort::run("images");
 
-To run the application,enter the program executable specifed in the CMakeLists.txt file, within the terminal (ensure that the files have already been built with CMake):
+To run the application,enter the program executable specifed in the CMakeLists.txt file, within the terminal (ensure that the files have already been built with CMake after editing):
 
     ./photosort
 
