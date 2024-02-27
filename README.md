@@ -3,48 +3,38 @@
 ## Overview
 
 PhotoSort is an application designed to help users automatically organize their photo collections into clusters based on visual similarity. The application leverages OpenCV's powerful image processing and feature detection algorithms to analyze and group images.
-Prerequisites
-
-- C++17 compatible compiler (GCC, Clang, MSVC, etc.)
-- CMake (version 3.14 or higher)
-- OpenCV (version 4.x)
-- A basic understanding of terminal or command prompt usage
 
 ## Installation
-Step 1: Install OpenCV
 
-You need to have OpenCV installed on your system. You can download and install OpenCV from the official OpenCV website or use a package manager like vcpkg, brew, or apt-get, depending on your operating system.
+### Prerequisites
 
-For example, on Ubuntu, you can install OpenCV using the following command:
+Before installing the Vision Library, ensure that OpenCV is installed on your system. This library has been tested with OpenCV version 3.5 & later. For detailed installation instructions of OpenCV (version 4.x), please refer to the [official OpenCV documentation](https://docs.opencv.org/master/). A basic understanding of terminal or command prompt usage is required.
 
-    sudo apt-get install libopencv-dev
+### Building the Library
 
-Step 2: Compile the Application
+To compile the Vision Library, follow these steps:
 
-1. Clone or download the application source code to your local machine.
-2. Navigate to the application's root directory.
-3. Create a new directory for the build process and navigate into it:
+1. Clone the repository to your local machine.
+2. Use CMake to prepare the build environment.
+3. Compile the source code.
 
-        mkdir build && cd build
-
-4. Run CMake to configure the project and generate makefiles:
-
-
-        cmake ..
-
-5. Compile the project:
-
-
-        make
+       git clone https://github.com/AlvinYapAbidin/VisionLib.git
+       cd VisionLib
+       cmake ..
+       make
 
 ## Demonstration
 ![Alt Text](https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/demorun.gif)
 
 ## Usage
 
-To run the application, you need to provide the path to the directory containing your images as an argument to the executable. From the build directory, execute the following command:
+To specify the folder of pictures, you must enter the folder name within the main function in the main.cpp file:
 
-    ./PhotoSort /path/to/your/images
+    Photosort::run("images");
+
+To run the application,enter the program executable specifed in the CMakeLists.txt file, within the terminal (ensure that the files have already been built with CMake):
+
+    ./photosort
 
 The application will process the images, detecting keypoints and descriptors, and then cluster the images based on similarity. Each cluster's images will be displayed in a window.
 
