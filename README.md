@@ -38,7 +38,7 @@ Step 2: Compile the Application
         make
 
 ## Demonstration
-![Alt Text](https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/codedemo.gif)
+![Alt Text](https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/demorun.gif)
 
 ## Usage
 
