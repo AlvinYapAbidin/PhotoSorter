@@ -38,7 +38,7 @@ Step 2: Compile the Application
         make
 
 ## Demonstration
-![Alt Text](
+![Alt Text](https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/demo.webm)
 
 ## Usage
 
