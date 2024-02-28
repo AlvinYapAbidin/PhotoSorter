@@ -76,6 +76,11 @@ The provided code comprises two parts, photosort.cpp and clustering.cpp, which a
 
 - Dependencies: Ensure that all dependencies, especially OpenCV and its contrib modules, are correctly installed and compatible with the version of the code.
 
+# Future Improvements
+
+- Create GUI for selecting, moving, deleting photos
+- Tagging pictures in relation to clusters or environment
+
 # Contributing
 
 I welcome contributions to the PhotoSorter project! If you have suggestions for improvements or bug fixes, please feel free to fork the repository and submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
