@@ -7,7 +7,6 @@ In the quest for the that perfect shot, photographers like myself often find the
 ## Key Features
 - Automatic clustering
 - Utilitzes Opencv image processing and feature matching
-- GUI Interface (currently under development)
 
 ## Installation
 
