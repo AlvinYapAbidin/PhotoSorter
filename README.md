@@ -2,7 +2,7 @@
 
 ## Capturing the perfect moment
 
-In the quest for the that perfect shot, photographers like myself often find themselves capturing multiple photos of the same scene to  ensure they're got the best possible selection. The challenge, however, arises during the editing process: sifting through these batches to unearth the gems can be a daunting task. PhotoSort is a solution designed looks to chamge the way photos are organised photocollections by automatically clustering images based on  their visual similarities.
+In the quest for the that perfect shot, photographers like myself often find themselves capturing multiple photos of the same scene to  ensure they're got the best possible selection. The challenge, however, arises during the editing process: sifting through these batches to unearth the gems can be a daunting task. PhotoSort is a solution designed looks to change the way photos are organised by automatically clustering images based on their visual similarities.
 
 ## Key Features
 - Automatic clustering
