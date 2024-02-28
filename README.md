@@ -35,7 +35,7 @@ To compile the Vision Library, follow these steps:
 
 To specify the folder of pictures, you must enter the folder name within the main function in the main.cpp file:
 
-    Photosort::run("images");
+    Photosort::run("path/to/folder");
 
 To run the application,enter the program executable specifed in the CMakeLists.txt file, within the terminal (ensure that the files have already been built with CMake after editing):
 
