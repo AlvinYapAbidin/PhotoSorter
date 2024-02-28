@@ -1,8 +1,13 @@
 # PhotoSorter
 
-## Overview
+## Capturing the perfect moment
 
-PhotoSort is an application designed to help users automatically organize their photo collections into clusters based on visual similarity. The application leverages OpenCV's powerful image processing and feature detection algorithms to analyze and group images.
+In the quest for the that perfect shot, photographers like myself often find themselves capturing multiple photos of the same scene to  ensure they're got the best possible selection. The challenge, however, arises during the editing process: sifting through these batches to unearth the gems can be a daunting task. PhotoSort is a solution designed looks to chamge the way photos are organised photocollections by automatically clustering images based on  their visual similarities.
+
+## Key Features
+- Automatic clustering
+- Utilitzes Opencv image processing and feature matching
+- GUI Interface is currently under development
 
 ## Installation
 
