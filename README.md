@@ -80,6 +80,7 @@ The provided code comprises two parts, photosort.cpp and clustering.cpp, which a
 
 - Create GUI for selecting, moving, deleting photos
 - Tagging pictures in relation to clusters or environment
+- Currently using classical approaches
 
 # Contributing
 
