@@ -76,11 +76,7 @@ The provided code comprises two parts, photosort.cpp and clustering.cpp, which a
 
 - Dependencies: Ensure that all dependencies, especially OpenCV and its contrib modules, are correctly installed and compatible with the version of the code.
 
-# Future Improvements
-
-- Create GUI for selecting, moving, deleting photos
-- Tagging pictures in relation to clusters or environment
-- Currently using classical approaches
+- Clasical approach requires manual testing for Match number threshold and Lowe's ration threshold
 
 # Contributing
 
