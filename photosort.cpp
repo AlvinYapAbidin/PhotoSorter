@@ -1,7 +1,8 @@
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
 #include "opencv2/core.hpp"
+#ifdef HAVE_OPENCV_XFEATURES2D
+#include "opencv2/calib3d.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 #include "opencv2/features2d.hpp"
 #include "opencv2/xfeatures2d.hpp"
 #include <opencv2/ml.hpp>
@@ -74,16 +75,16 @@ namespace Photosort
         cv::Mat imgBlurred;
         cv::GaussianBlur(imgGray, imgBlurred, cv::Size(3,3), 0);
         
-        cv::Mat imgSharpened;
-        Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0); 
+        // cv::Mat imgSharpened;
+        // cv::Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0); 
 
-        cv::Mat imgContrast;
-        cv::createCLAHE()->apply(imgBlurred, imgContrast);
+        // cv::Mat imgContrast;
+        // cv::createCLAHE()->apply(imgBlurred, imgContrast);
         
-        //cv::Mat imgDenoised;
-        //cv::fastNlMeansDenoisingColored(image, imgDenoised, 10, 10, 7, 21); // Another option for preprocessing
+        // cv::Mat imgDenoised;
+        // cv::fastNlMeansDenoisingColored(image, imgDenoised, 10, 10, 7, 21); // Another option for preprocessing
 
-        return imgContrast;
+        return imgBlurred;
     }
 
     void updateProgressBar(int current, int total)
@@ -116,7 +117,7 @@ namespace Photosort
             return -1;
         }
         
-        std::cout << "Preprocessing and detecting keypoints using ORB detector" << std::endl; // Update text to display appropriate detector.
+        std::cout << "Preprocessing and detecting keypoints using detector" << std::endl; // Update text to display appropriate detector.
         int totalFiles = countFilesInDirectory(folder_path);
         int processFiles{};
 
@@ -136,17 +137,20 @@ namespace Photosort
                 cv::Mat preprocessedImg = preprocess(img);
 
                 // cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
-                cv::Ptr<cv::ORB> detector = cv::ORB::create();
+                // cv::Ptr<cv::ORB> detector = cv::ORB::create();
+                int minHessian = 400;
+                cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create( minHessian );
+
                 std::vector<cv::KeyPoint> keyPoints;
                 cv::Mat descriptors;
 
                 detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
 
-                // // FLANN matcher requires descriptors to be type 'CV_32F'
-                // if (descriptors.type() != CV_32F)  
-                // {
-                //     descriptors.convertTo(descriptors, CV_32F);
-                // }
+                // FLANN matcher requires descriptors to be type 'CV_32F'
+                if (descriptors.type() != CV_32F)  
+                {
+                    descriptors.convertTo(descriptors, CV_32F);
+                }
 
                 allKeypoints.push_back(keyPoints);
                 allDescriptors.push_back(descriptors);
@@ -157,20 +161,18 @@ namespace Photosort
         }
         std::cout << std::endl;
 
-
         // Cluster based on similarity score
         std::cout << "Clustering based on similarity" << std::endl;
 
-        const int MATCH_THRESHOLD = 20; // Minimum number of matches required
-        const float ratio_thresh = 0.75f; // Lowe's ratio threshold for filtering matches
+        const int MATCH_THRESHOLD = 30; 
+        const float ratio_thresh = 0.6f; // Lowe's ratio threshold for filtering matches
 
-        //std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT dectector
+        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
 
-        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use BFMatcher with ORB detector
+        // std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use BFMatcher with ORB detector
 
         std::cout << std::endl;
     
-
         // Printing each of the clusters
         for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
         {
@@ -194,9 +196,14 @@ namespace Photosort
             displayImagesGrid(clusterImagePaths, "Cluster " + std::to_string(cluster.first + 1));
         }
 
-
-
         return 0;
     }
 }
     
+#else
+int main()
+{
+    std::cout << "The SURF  detector needs the xfeatures2d contriv module to be run" << std::endl;
+    return 0;
+}
+#endif

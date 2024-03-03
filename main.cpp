@@ -17,5 +17,5 @@ int main(int argc, char** argv)
 
     // Photosort::run("test");
 
-    Photosort::run("test");
+    Photosort::run("photos");
 }

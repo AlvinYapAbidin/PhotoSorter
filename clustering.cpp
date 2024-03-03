@@ -12,6 +12,23 @@
 #include <iostream>
 #include <map>
 
+void updateProgressBar(int current, int total)
+    {
+        float progress = (current)/ (float)total;
+        int barWidth  = 70;
+
+        std::cout << "[";
+        int pos = barWidth * progress;
+        for (int i = 0; i < barWidth; ++i)
+        {
+            if (i < pos) std::cout << "=";
+            else if ( i == pos) std::cout << "=";
+            else std::cout << " ";
+        }
+        std::cout << "] " << int(progress * 100.0) << " %\r";
+        std::cout.flush();
+    }
+
 namespace Clustering
 {
     std::map<int, std::vector<int>> clusterImagesFLANN(const std::vector<cv::Mat>& allDescriptors, int matchThreshold, float ratioThresh)
@@ -52,7 +69,11 @@ namespace Clustering
             if (!foundCluster) 
             {
                 clusters[clusterId++] = std::vector<int>{i}; // A new cluster is created for the image if no similar is found
+                
             }
+
+            updateProgressBar(i, allDescriptors.size());
+    
         }
         return clusters;
     }
