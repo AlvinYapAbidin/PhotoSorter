@@ -22,14 +22,14 @@ To compile the Vision Library, follow these steps:
 
 1. Clone the repository to your local machine.
 
-       git clone https://github.com/AlvinYapAbidin/VisionLib.git
-       cd VisionLib
+       git clone https://github.com/AlvinYapAbidin/PhotoSorter.git
+       cd PhotoSorter
 
-3. Use CMake to prepare the build environment.
+2. Use CMake to prepare the build environment. 
 
-       make
+       cmake .
 
-5. Compile the source code.
+3. Compile the source code.
 
        make
 
