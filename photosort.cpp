@@ -137,9 +137,9 @@ namespace Photosort
                 cv::Mat preprocessedImg = preprocess(img);
 
                 // cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
-                // cv::Ptr<cv::ORB> detector = cv::ORB::create();
-                int minHessian = 400;
-                cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create( minHessian );
+                cv::Ptr<cv::ORB> detector = cv::ORB::create();
+                // int minHessian = 400;
+                // cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create( minHessian );
 
                 std::vector<cv::KeyPoint> keyPoints;
                 cv::Mat descriptors;
@@ -147,10 +147,10 @@ namespace Photosort
                 detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
 
                 // FLANN matcher requires descriptors to be type 'CV_32F'
-                if (descriptors.type() != CV_32F)  
-                {
-                    descriptors.convertTo(descriptors, CV_32F);
-                }
+                // if (descriptors.type() != CV_32F)  
+                // {
+                //     descriptors.convertTo(descriptors, CV_32F);
+                // }
 
                 allKeypoints.push_back(keyPoints);
                 allDescriptors.push_back(descriptors);
@@ -167,9 +167,9 @@ namespace Photosort
         const int MATCH_THRESHOLD = 30; 
         const float ratio_thresh = 0.6f; // Lowe's ratio threshold for filtering matches
 
-        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
+        // std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
 
-        // std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use BFMatcher with ORB detector
+        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use BFMatcher with ORB detector
 
         std::cout << std::endl;
     
