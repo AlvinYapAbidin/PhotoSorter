@@ -11,11 +11,11 @@ int main(int argc, char** argv)
 
     // 1. Read each picture in the folder
 
-    // 2. Apply histogram to each picture, possibly add  feature detection for better accuracy
+    // 2. Apply feature detection to get keypoints
 
     // 3. Use cluster algorithm to group similar 
 
-    // Photosort::run("test");
+    Photosort::run("test");
 
-    Photosort::run("photos");
+    // Photosort::run("photos");
 }

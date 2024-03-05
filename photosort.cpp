@@ -7,64 +7,16 @@
 #include "opencv2/xfeatures2d.hpp"
 #include <opencv2/ml.hpp>
 #include <algorithm>
-#include <filesystem>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <map>
-#include "clustering.h"
+#include "utility.h"
 
 // Didn't use namespace cv and std for learning purposes
 
 namespace Photosort
 {
-    int countFilesInDirectory(const std::filesystem::path& path) {
-        return std::count_if(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator{},
-                            [](const auto& entry) { return entry.is_regular_file(); });
-    }
-
-    void displayImagesGrid(const std::vector<std::string>& imagePaths, const std::string& windowName = "Cluster Images", int imagesPerRow = 5) {
-        if (imagePaths.empty()) {
-            std::cout << "The cluster is empty." << std::endl;
-            return;
-        }
-
-        // Determine grid size
-        size_t numRows = (imagePaths.size() + imagesPerRow - 1) / imagesPerRow;
-        int thumbWidth = 500; 
-        int thumbHeight = 500; 
-
-        // Create a large image to hold the grid
-        cv::Mat gridImage(thumbHeight * numRows, thumbWidth * imagesPerRow, CV_8UC3, cv::Scalar(0, 0, 0));
-
-        for (size_t i = 0; i < imagePaths.size(); ++i) {
-            cv::Mat img = cv::imread(imagePaths[i]);
-            if (img.empty()) {
-                std::cerr << "Warning: Unable to read image: " << imagePaths[i] << std::endl;
-                continue;
-            }
-
-            // Resize image to thumbnail size
-            cv::Mat thumbnail;
-            cv::resize(img, thumbnail, cv::Size(thumbWidth, thumbHeight));
-
-            // Calculate position in the grid
-            int row = i / imagesPerRow;
-            int col = i % imagesPerRow;
-            int startX = col * thumbWidth;
-            int startY = row * thumbHeight;
-
-            // Copy thumbnail into the correct grid position
-            thumbnail.copyTo(gridImage(cv::Rect(startX, startY, thumbWidth, thumbHeight)));
-        }
-
-        // Display the grid
-        cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
-        cv::imshow(windowName, gridImage);
-        cv::waitKey(0);
-        cv::destroyWindow(windowName);
-    }
-
     cv::Mat preprocess(cv::Mat image)
     {
         cv::resize(image, image, cv::Size(), 0.5, 0.5);
@@ -87,23 +39,6 @@ namespace Photosort
         return imgBlurred;
     }
 
-    void updateProgressBar(int current, int total)
-    {
-        float progress = (current)/ (float)total;
-        int barWidth  = 70;
-
-        std::cout << "[";
-        int pos = barWidth * progress;
-        for (int i = 0; i < barWidth; ++i)
-        {
-            if (i < pos) std::cout << "=";
-            else if ( i == pos) std::cout << "=";
-            else std::cout << " ";
-        }
-        std::cout << "] " << int(progress * 100.0) << " %\r";
-        std::cout.flush();
-    }
-
     int run(std::string path)
     {
         std::string folder_path = path;
@@ -117,8 +52,30 @@ namespace Photosort
             return -1;
         }
         
+        std::cout << "Pick a detector: " << std::endl;
+        std::cout << "Press 1 for ORB detector" << std::endl;
+        std::cout << "Press 2 for SURF detector" << std::endl;
+        std::cout << "Press 3 for SIFT detector" << std::endl;
+        int userInput{};
+        std::cin >> userInput;
+
+        switch (userInput) 
+        {
+            case 1:
+                std::cout << "You selected the ORB Detector." << std::endl;
+                break;
+            case 2:
+                std::cout << "You selected the SIFT Detector." << std::endl;
+                break;
+            case 3:
+                std::cout << "You selected the SURF Detector." << std::endl;
+                break;
+            default:
+                std::cout << "Invalid choice. Please enter 1, 2, or 3." << std::endl;
+        }
+
         std::cout << "Preprocessing and detecting keypoints using detector" << std::endl; // Update text to display appropriate detector.
-        int totalFiles = countFilesInDirectory(folder_path);
+        int totalFiles = Utility::countFilesInDirectory(folder_path);
         int processFiles{};
 
         for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(folder_path))
@@ -136,66 +93,151 @@ namespace Photosort
                 // Preprocess
                 cv::Mat preprocessedImg = preprocess(img);
 
-                // cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
-                cv::Ptr<cv::ORB> detector = cv::ORB::create();
-                // int minHessian = 400;
-                // cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create( minHessian );
+                std::vector<cv::KeyPoint> keyPoints{};
+                cv::Mat descriptors{};
 
-                std::vector<cv::KeyPoint> keyPoints;
-                cv::Mat descriptors;
+                if (userInput == 1) 
+                {
+                    cv::Ptr<cv::ORB> detector = cv::ORB::create();
+                    std::vector<cv::KeyPoint> keyPoints;
+                    cv::Mat descriptors;
+                    detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
+                    
+                    allKeypoints.push_back(keyPoints);
+                    allDescriptors.push_back(descriptors);
+                    image_paths.push_back(imagePath);
+                } 
+                else if (userInput == 2) 
+                {
+                    int minHessian = 100;
+                    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(minHessian);
+                    std::vector<cv::KeyPoint> keyPoints;
+                    cv::Mat descriptors;
+                    detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
+                    // FLANN matcher requires descriptors to be type 'CV_32F'
+                    if (descriptors.type() != CV_32F) 
+                    {
+                        descriptors.convertTo(descriptors, CV_32F);
+                    }
 
-                detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
+                    allKeypoints.push_back(keyPoints);
+                    allDescriptors.push_back(descriptors);
+                    image_paths.push_back(imagePath);
+                } 
+                else if (userInput == 3) 
+                {
+                    cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
+                    std::vector<cv::KeyPoint> keyPoints;
+                    cv::Mat descriptors;
+                    detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
+                    // FLANN matcher requires descriptors to be type 'CV_32F'
+                    if (descriptors.type() != CV_32F) 
+                    {
+                        descriptors.convertTo(descriptors, CV_32F);
+                    }
 
-                // FLANN matcher requires descriptors to be type 'CV_32F'
-                // if (descriptors.type() != CV_32F)  
-                // {
-                //     descriptors.convertTo(descriptors, CV_32F);
-                // }
+                    allKeypoints.push_back(keyPoints);
+                    allDescriptors.push_back(descriptors);
+                    image_paths.push_back(imagePath);
+                }
 
-                allKeypoints.push_back(keyPoints);
-                allDescriptors.push_back(descriptors);
-                image_paths.push_back(imagePath);
-                
-                updateProgressBar(++processFiles, totalFiles);
+
+                Utility::updateProgressBar(++processFiles, totalFiles);
             }
         }
         std::cout << std::endl;
 
         // Cluster based on similarity score
         std::cout << "Clustering based on similarity" << std::endl;
+        std::map<int, std::vector<int>> clusters{};
 
-        const int MATCH_THRESHOLD = 30; 
-        const float ratio_thresh = 0.6f; // Lowe's ratio threshold for filtering matches
-
-        // std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
-
-        std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use BFMatcher with ORB detector
-
-        std::cout << std::endl;
-    
-        // Printing each of the clusters
-        for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
+        if (userInput == 1)
         {
-            std::cout << "Cluster " << cluster.first + 1 << " has " << cluster.second.size() << " photos:\n";
-            for (const int& index : cluster.second) 
+            const int MATCH_THRESHOLD = 20; 
+            const float ratio_thresh = 0.75f;
+
+            std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh);
+
+            for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
             {
-                std::cout << " - " << image_paths[index] << std::endl; // Access path using index 
-            }
-        }
-
-        std::cout << "Press any key to go to the next cluster." << std::endl;
-
-        // Loop through each cluster and display its images in a grid
-        for (const auto& cluster : clusters) {
-            std::vector<std::string> clusterImagePaths;
-            for (int index : cluster.second) {
-                clusterImagePaths.push_back(image_paths[index]); // Collect image paths for the current cluster
+                std::cout << "Cluster " << cluster.first + 1 << " has " << cluster.second.size() << " photos:\n";
+                for (const int& index : cluster.second) 
+                {
+                    std::cout << " - " << image_paths[index] << std::endl; // Access path using index 
+                }
             }
 
-            // Display images
-            displayImagesGrid(clusterImagePaths, "Cluster " + std::to_string(cluster.first + 1));
-        }
+            std::cout << "Press any key to go to the next cluster." << std::endl;
 
+            // Loop through each cluster and display its images in a grid
+            for (const auto& cluster : clusters) {
+                std::vector<std::string> clusterImagePaths;
+                for (int index : cluster.second) {
+                    clusterImagePaths.push_back(image_paths[index]); // Collect image paths for the current cluster
+                }
+
+                // Display images
+                Utility::displayImagesGrid(clusterImagePaths, "Cluster " + std::to_string(cluster.first + 1));
+            }
+        }
+        else if (userInput == 2) 
+        {
+            const int MATCH_THRESHOLD = 100; 
+            const float ratio_thresh = 0.6f;
+
+            std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
+
+            for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
+            {
+                std::cout << "Cluster " << cluster.first + 1 << " has " << cluster.second.size() << " photos:\n";
+                for (const int& index : cluster.second) 
+                {
+                    std::cout << " - " << image_paths[index] << std::endl; // Access path using index 
+                }
+            }
+
+            std::cout << "Press any key to go to the next cluster." << std::endl;
+
+            // Loop through each cluster and display its images in a grid
+            for (const auto& cluster : clusters) {
+                std::vector<std::string> clusterImagePaths;
+                for (int index : cluster.second) {
+                    clusterImagePaths.push_back(image_paths[index]); // Collect image paths for the current cluster
+                }
+
+                // Display images
+                Utility::displayImagesGrid(clusterImagePaths, "Cluster " + std::to_string(cluster.first + 1));
+            }
+        }
+        else if (userInput == 3)
+        {
+            const int MATCH_THRESHOLD = 80; 
+            const float ratio_thresh = 0.6f;
+
+            std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
+
+            for (const std::pair<const int, std::vector<int>>& cluster : clusters) 
+            {
+                std::cout << "Cluster " << cluster.first + 1 << " has " << cluster.second.size() << " photos:\n";
+                for (const int& index : cluster.second) 
+                {
+                    std::cout << " - " << image_paths[index] << std::endl; // Access path using index 
+                }
+            }
+
+            std::cout << "Press any key to go to the next cluster." << std::endl;
+
+            // Loop through each cluster and display its images in a grid
+            for (const auto& cluster : clusters) {
+                std::vector<std::string> clusterImagePaths;
+                for (int index : cluster.second) {
+                    clusterImagePaths.push_back(image_paths[index]); // Collect image paths for the current cluster
+                }
+
+                // Display images
+                Utility::displayImagesGrid(clusterImagePaths, "Cluster " + std::to_string(cluster.first + 1));
+            }
+        }
         return 0;
     }
 }
