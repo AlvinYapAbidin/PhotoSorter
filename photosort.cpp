@@ -5,6 +5,7 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/features2d.hpp"
 #include "opencv2/xfeatures2d.hpp"
+#include <opencv2/photo.hpp>
 #include <opencv2/ml.hpp>
 #include <algorithm>
 #include <vector>
@@ -17,9 +18,9 @@
 
 namespace Photosort
 {
-    cv::Mat preprocess(cv::Mat image)
+    cv::Mat preprocess(cv::Mat image, int userInput)
     {
-        cv::resize(image, image, cv::Size(), 0.5, 0.5);
+        cv::resize(image, image, cv::Size(), 0.2, 0.2);
 
         cv::Mat imgGray;
         cv::cvtColor(image, imgGray, cv::COLOR_BGR2GRAY);
@@ -27,16 +28,18 @@ namespace Photosort
         cv::Mat imgBlurred;
         cv::GaussianBlur(imgGray, imgBlurred, cv::Size(3,3), 0);
         
-        // cv::Mat imgSharpened;
-        // cv::Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0); 
-
-        // cv::Mat imgContrast;
-        // cv::createCLAHE()->apply(imgBlurred, imgContrast);
+        cv::Mat imgSharpened;
+        cv::Mat imgContrast;
+        cv::createCLAHE()->apply(imgBlurred, imgContrast);
         
-        // cv::Mat imgDenoised;
-        // cv::fastNlMeansDenoisingColored(image, imgDenoised, 10, 10, 7, 21); // Another option for preprocessing
+        if (userInput==1)
+        {
+            cv::Laplacian(imgBlurred, imgSharpened, image.depth(), 3, 1, 0);
+            return imgContrast;
+        }
 
-        return imgBlurred;
+
+        return imgContrast;
     }
 
     int run(std::string path)
@@ -84,23 +87,23 @@ namespace Photosort
             {
                 std::string imagePath = entry.path().string();
                 cv::Mat img = cv::imread(imagePath, cv::IMREAD_COLOR);
+
                 if (img.empty()) 
                 {
                     std::cerr << "Failed to load image at " << imagePath << std::endl;
                     continue;
                 }
 
-                // Preprocess
-                cv::Mat preprocessedImg = preprocess(img);
-
                 std::vector<cv::KeyPoint> keyPoints{};
                 cv::Mat descriptors{};
 
                 if (userInput == 1) 
                 {
+                    // Preprocess
+                    cv::Mat preprocessedImg = preprocess(img, userInput);
+
                     cv::Ptr<cv::ORB> detector = cv::ORB::create();
-                    std::vector<cv::KeyPoint> keyPoints;
-                    cv::Mat descriptors;
+
                     detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
                     
                     allKeypoints.push_back(keyPoints);
@@ -109,10 +112,11 @@ namespace Photosort
                 } 
                 else if (userInput == 2) 
                 {
+                    cv::Mat preprocessedImg = preprocess(img, userInput);
+
                     int minHessian = 100;
                     cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(minHessian);
-                    std::vector<cv::KeyPoint> keyPoints;
-                    cv::Mat descriptors;
+
                     detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
                     // FLANN matcher requires descriptors to be type 'CV_32F'
                     if (descriptors.type() != CV_32F) 
@@ -126,9 +130,10 @@ namespace Photosort
                 } 
                 else if (userInput == 3) 
                 {
+                    cv::Mat preprocessedImg = preprocess(img, userInput);
+
                     cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
-                    std::vector<cv::KeyPoint> keyPoints;
-                    cv::Mat descriptors;
+
                     detector->detectAndCompute(preprocessedImg, cv::noArray(), keyPoints, descriptors);
                     // FLANN matcher requires descriptors to be type 'CV_32F'
                     if (descriptors.type() != CV_32F) 
@@ -153,8 +158,8 @@ namespace Photosort
 
         if (userInput == 1)
         {
-            const int MATCH_THRESHOLD = 20; 
-            const float ratio_thresh = 0.75f;
+            const int MATCH_THRESHOLD = 18; 
+            const float ratio_thresh = 0.8f;
 
             std::map<int, std::vector<int>> clusters = Clustering::clusterImagesBFMatcher(allDescriptors, MATCH_THRESHOLD, ratio_thresh);
 
@@ -183,7 +188,7 @@ namespace Photosort
         else if (userInput == 2) 
         {
             const int MATCH_THRESHOLD = 100; 
-            const float ratio_thresh = 0.6f;
+            const float ratio_thresh = 0.7f;
 
             std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
 
@@ -212,7 +217,7 @@ namespace Photosort
         else if (userInput == 3)
         {
             const int MATCH_THRESHOLD = 80; 
-            const float ratio_thresh = 0.6f;
+            const float ratio_thresh = 0.7f;
 
             std::map<int, std::vector<int>> clusters = Clustering::clusterImagesFLANN(allDescriptors, MATCH_THRESHOLD, ratio_thresh); // Use FLANN with SIFT and SURF dectector
 

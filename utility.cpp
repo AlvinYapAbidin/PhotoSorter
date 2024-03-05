@@ -128,7 +128,10 @@ namespace Clustering
             {
                 clusters[clusterId++] = std::vector<int>{i}; // A new cluster is created for the image if no similar is found
             }
+
+            Utility::updateProgressBar(i, allDescriptors.size());
         }
+        std::cout << std::endl;
         return clusters;
     }
 
@@ -144,13 +147,6 @@ namespace Clustering
             bool foundCluster = false;
             for (std::pair<const int, std::vector<int>>& cluster : clusters)
             {
-                // Below is for error handling - knnmatch descriptors sets has fewer than 2 descriptors
-                int kValue = 2;
-                if (allDescriptors[i].rows < kValue || allDescriptors[cluster.second[0]].rows < kValue)
-                {
-                    kValue = std::min({allDescriptors[i].rows, allDescriptors[cluster.second[0]].rows, kValue});
-                }
-
                 // Here we match the current image descriptors with the first image of each cluster
                 std::vector<std::vector<cv::DMatch>> knn_matches;
                 matcher.knnMatch(allDescriptors[i], allDescriptors[cluster.second[0]], knn_matches, 2);
@@ -167,7 +163,7 @@ namespace Clustering
 
                 if (good_matches.size() > matchThreshold)
                 {
-                    // Add to cluster if current image is similar 
+                    // Add to cluster if current image is similar
                     cluster.second.push_back(i);
                     foundCluster = true;
                     break;
@@ -178,7 +174,10 @@ namespace Clustering
             {
                 clusters[clusterId++] = std::vector<int>{i}; // A new cluster is created for the image if no similar is found
             }
+            Utility::updateProgressBar(i, allDescriptors.size());
+            
         }
+        std::cout << std::endl;
         return clusters;
     }
 }
