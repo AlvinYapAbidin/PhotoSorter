@@ -4,6 +4,10 @@
 
 In the quest for the that perfect shot, photographers like myself often find themselves capturing multiple photos of the same scene to  ensure they're got the best possible selection. The challenge, however, arises during the editing process: sifting through these batches to unearth the gems can be a daunting task. PhotoSort is a solution designed looks to change the way photos are organised by automatically clustering images based on their visual similarities.
 
+## Demonstration
+![Alt Text](https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/demorun.gif)
+
+
 ## Key Features
 - Automatic Clustering: Streamline the organization of your photo collections by grouping images that share visual similarities.
 - Advanced Image Processing: Utilizes OpenCV's robust image processing capabilities to enhance feature matching.
@@ -32,9 +36,6 @@ To compile the Vision Library, follow these steps:
 3. Compile the source code.
 
        make
-
-## Demonstration
-![Alt Text](https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/demorun.gif)
 
 ## Usage
 
