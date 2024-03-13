@@ -2,17 +2,18 @@
 
 ## Capturing the perfect moment
 
-In the quest for the that perfect shot, photographers like myself often find themselves capturing multiple photos of the same scene to  ensure they're got the best possible selection. The challenge, however, arises during the editing process: sifting through these batches to unearth the gems can be a daunting task. PhotoSort is a solution designed looks to change the way photos are organised by automatically clustering images based on their visual similarities.
+Photographers often capture multiple shots of the same scene to ensure they get the best possible selection. The challenge arises during the editing process: sifting through these batches to find the gems. PhotoSorter simplifies this by automatically clustering images based on visual similarities, making the editing process easier and more efficient.
 
 ## Demonstration
 ![Alt Text](https://github.com/AlvinYapAbidin/PhotoSorter/blob/main/demorun.gif)
 
 
 ## Key Features
-- Automatic Clustering: Streamline the organization of your photo collections by grouping images that share visual similarities.
-- Advanced Image Processing: Utilizes OpenCV's robust image processing capabilities to enhance feature matching.
-- Feature Matching with SURF: Incorporates the SURF (Speeded Up Robust Features) detector for improved detection of keypoints and descriptors, offering a significant boost in the quality of clustering compared to ORB and SIFT.
-- NOTE: SURF detector requires Opencv to be built with the non-free version as the SURF detector is patented
+- Multiple Detection Algorithms: Supports ORB, SIFT, and SURF detectors, allowing users to choose the best tool for their needs.
+- Advanced Image Preprocessing: Enhances image quality for feature detection, including resizing, grayscaling, blurring, and contrast enhancement.
+- Automatic Clustering: Groups your photo collection based on visual similarities, streamlining organization.
+- User Interaction: Users can select their preferred feature detector through simple input prompts, tailoring the sorting process to their specific requirements.
+- Extensive OpenCV Utilization: Leverages OpenCV's robust image processing capabilities to maximize feature matching and clustering quality.
 
 ## Installation
 
